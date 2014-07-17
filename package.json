@@ -1,0 +1,21 @@
+{
+  "name": "ninja-flower-power",
+  "version": "0.0.1",
+  "description": "Ninja Flower Power Driver",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elliots/ninja-flower-power"
+  },
+  "dependencies": {
+    "flower-power": "git://github.com/elliots/node-flower-power.git",
+    "noble": "^0.3.1",
+    "async": "^0.9.0"
+  },
+  "author": "Elliot Shepherd <elliot@ninjablocks.com>",
+  "license": "MIT",
+  "config": {}
+}
