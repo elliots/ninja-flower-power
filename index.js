@@ -34,7 +34,7 @@ Driver.prototype.start = function() {
 
   noble.on('discover', function(peripheral) {
     if (busy[peripheral.uuid]) {
-      log.debug('Ignoring', peripheral.uuid);
+//      log.debug('Ignoring', peripheral.uuid);
       return;
     }
 
@@ -49,20 +49,25 @@ Driver.prototype.start = function() {
 
     device.connect(function() {
       log.info('Connected to', device.uuid);
-      device.discoverServicesAndCharacteristics(function() {
+      device.discoverServicesAndCharacteristics(function(x) {
+        log.info('Got characteristics', x);
         device.readSerialNumber(function(serialNumber) {
           log.info('Connected to device', device.uuid, 'with serial number :', serialNumber);
 
           if (!devices[device.uuid]) {
             devices[device.uuid] = [
-              new Device(serialNumber, device.name, 9, 'readTemperature'),
-              new Device(serialNumber, device.name, 2000, 'readSunlight'),
-              new Device(serialNumber, device.name, 8, 'readSoilMoisture')
-            ];
+              new Device(log, device.uuid, 'Flower Power Temp ' + device.uuid, 9, 'readTemperature'),
+              new Device(log, device.uuid, 'Flower Power Sun ' + device.uuid, 2000, 'readSunlight'),
+              new Device(log, device.uuid, 'Flower Power Moisture ' + device.uuid, 8, 'readSoilMoisture')
+            ].map(function(d) {
+              self.emit('register', d);
+              return d;
+            });
           }
 
           process.nextTick(function() {
-            async.sync(devices.map(function(d) {
+            async.series(devices[device.uuid].map(function(d) {
+              console.log('checking device', d);
               return d.update.bind(d, device);
             }), function() {
               log.info('Finished updating', device.uuid);
@@ -97,11 +102,11 @@ function Device(log, serial, name, deviceId, method) {
   this.name = name;
   this.G = 'flowerpower'+serial;
   this.log = log;
+  this.method = method;
 }
 util.inherits(Device, stream);
 
 Device.prototype.update = function(fp, cb) {
-
   var self = this;
   var log = this.log;
   var send = this.emit.bind(this, 'data');
